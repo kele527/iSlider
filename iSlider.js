@@ -60,11 +60,12 @@ if (/iPhone|iPod|iPad/.test(navigator.userAgent)) {
 
 var iSlider = {
     opts:{
-        speed:400,
-        isVertical:true,
+        speed:400, //滑屏速度
+        triggerDist:30,//触发滑动的手指移动最小位移
+        isVertical:true,//垂直滑还是水平滑动
         loadingImgs:[],
         preLoadingImgs:[],
-        onSlide:function () {},
+        onSlide:function () {},//滑动回调 参数是本对象
         onLoading:function () {}
     },
     wrap:null,
@@ -201,9 +202,9 @@ var iSlider = {
 	},
 	touchend : function (e) {
 
-		if(this.deltaX2<-50){
+		if(this.deltaX2 < -this.opts.triggerDist){
 			this.next();
-		}else if(this.deltaX2 > 50){
+		}else if(this.deltaX2 > this.opts.triggerDist){
 			this.prev();
 		}else{
 			this.itemReset();
