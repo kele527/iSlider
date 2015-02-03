@@ -13,17 +13,24 @@
  * @param {function} [opts.onloading]  loading时每加载完成一个图片都会触发这个回调  回调时参数值为 (已加载个数,总数)
  * @desc 
 
-     如丝般高性能全屏动画滑屏组件, 主要应用于微信H5宣传页,海报,推广介绍等场景. 基于iSlider,可以快速搭建效果炫丽的H5滑屏页面.
-     简洁,易用.  无css依赖.
-     专注于页面滑动, 没有冗余代码 , 保证性能.
-     组件只适用于H5移动端, 组件没有任何依赖.
-     imgcache 引用地址 : http://imgcache.gtimg.cn/music/h5/lib/js/module/iSlider-1.0.min.js?_bid=363&max_age=2592000
- 
+-  如丝般高性能全屏动画滑屏组件, 主要应用于微信H5宣传页,海报,推广介绍等场景. 基于iSlider,可以快速搭建效果炫丽的H5滑屏页面.
+-  简洁,易用.  无css依赖.
+-  专注于页面滑动, 没有冗余代码 , 保证性能.
+-  组件没有任何依赖.
+-  imgcache 引用地址 : http://imgcache.gtimg.cn/music/h5/lib/js/module/iSlider-1.0.min.js?_bid=363&max_age=2592000
+-  github: https://github.com/kele527/iSlider
+
+
  * @example
+
+    //极简用法
+    new iSlider(); //容器默认是 .wrap  元素默认是 .item   动画播放class默认是 play
+
     //普通用法
     new iSlider({
-        container:'#demo1',
+        wrap:'.wrap',
         item:'.item',
+        playClass:'play',
         onslide:function (index) {
             console.info(index)
         }
@@ -31,7 +38,9 @@
 
     //带loading进度条用法
     new iSlider({
-        wrap:'#demo1',
+        wrap:'.wrap',
+        item:'.item',
+        playClass:'play',
         onslide:function (index) {
             console.info(index)
         },
@@ -48,6 +57,7 @@
             }
         }
     });
+
 
  * @date 2014/11/3 星期一
  * @author rowanyang
