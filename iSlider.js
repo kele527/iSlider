@@ -57,7 +57,7 @@
             }
         }
     });
-
+    demo http://kele527.github.io/iSlider/demo1.html
 
  * @date 2014/11/3 星期一
  * @author rowanyang
