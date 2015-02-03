@@ -44,13 +44,6 @@
 
 ;(function (win) {
 
-function extend(a,b) {
-    for (var i in b) {
-        a[i]=b[i];
-    }
-    return a;
-}
-
 var raf = function (cb) {setTimeout(function (){cb()},100)};
 
 //android上用了raf也没啥效果  所以只对高富帅用
@@ -92,7 +85,11 @@ var iSlider = {
      */
 	init:function (opts) {
 		var self = this;
-        extend(this.opts,opts);
+
+        for (var i in opts) {
+            this.opts[i]=opts[i];
+        }
+
         this.wrap=this.$(this.opts.container);
 
         this.tpl= this.wrap.cloneNode(true);
@@ -112,9 +109,11 @@ var iSlider = {
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
         
-        this.wrap.innerHTML='';
+        this.wrap.innerHTML=
+            '<div id="current" class="js-iSlider-item '+this.tpl[0].className+'" style="'+this.getTransform(0)+'">'+this.tpl[0].innerHTML+'</div>'+
+            '<div id="next" class="js-iSlider-item '+this.tpl[1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[1].innerHTML+'</div>';
         this.wrap.style.cssText+="display:block;position:relative;width:100%;height:100%";
-        
+
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
             this.loading();
         }else {
@@ -143,10 +142,6 @@ var iSlider = {
 	},
     pageInit:function () {
         var self = this;
-        this.wrap.innerHTML=
-            '<div id="current" class="js-iSlider-item '+this.tpl[0].className+'" style="'+this.getTransform(0)+'">'+this.tpl[0].innerHTML+'</div>'+
-            '<div id="next" class="js-iSlider-item '+this.tpl[1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[1].innerHTML+'</div>';
-
         raf(function () {
             self.$('#current').className+=' play';
         });
@@ -331,8 +326,6 @@ var iSlider = {
         var imgurls=this.opts.loadingImgs;
         var fallback=setTimeout(this.pageInit,15*1000);//超时时间  万一进度条卡那了 15秒后直接显示
 
-	    this.wrap.appendChild(this.$(this.opts.loadingId));
-        
         var imgs=[], loaded=1;
         var total=imgurls.length+1;
         for (var i=0; i<imgurls.length; i++) {
@@ -355,6 +348,7 @@ var iSlider = {
                 if (fallback) {
                     clearTimeout(fallback)
                 }
+
                 self.pageInit();
 
                 imgs=null;
@@ -363,9 +357,6 @@ var iSlider = {
                 }
             }
         }
-    },
-    preloading:function () {
-
     }
 
 }
