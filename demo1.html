@@ -153,16 +153,16 @@
 
 //demo
 //用法
-iSlider.init({
-    container:'#wrap',
+var myslider=new iSlider({
+    wrap:'#wrap',
     item:'.item',
-    onSlide:function () {
-        if (this.index == 7) {
+    onslide:function (index) {
+        if (index == 7) {
             document.getElementById('J_joinNum').innerHTML=parseInt(Math.random()*10000);
         }
     }
 });
-
+console.info(myslider)
 
 
 </script>

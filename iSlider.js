@@ -1,42 +1,64 @@
-
 /**
  * iSlider 通用全屏滑动切换动画组件 
- * @namespace iSlider
+ * @class iSlider 
+ * @param {object} opts
+ * @param {string} opts.wrap='.wrap' 容器 
+ * @param {string} opts.item='.item'  滚动单元的元素
+ * @param {string} opts.playClass='play'  触发播放动画的class
+ * @param {number} [opts.speed=400] 动画速度 单位:ms
+ * @param {number} [opts.triggerDist=30] 触发滑动的手指移动最小位移 单位:像素
+ * @param {boolean} [opts.isVertical=true] 滑动方向 是否是垂直方向 默认是.
+ * @param {function} [opts.onslide]  滑动后回调函数
+ * @param {array} [opts.loadingImgs]  loading需要加载的图片地址列表
+ * @param {function} [opts.onloading]  loading时每加载完成一个图片都会触发这个回调  回调时参数值为 (已加载个数,总数)
+ * @desc 
+
+-  如丝般高性能全屏动画滑屏组件, 主要应用于微信H5宣传页,海报,推广介绍等场景. 基于iSlider,可以快速搭建效果炫丽的H5滑屏页面.
+-  简洁,易用.  无css依赖.
+-  专注于页面滑动, 没有冗余代码 , 保证性能.
+-  组件没有任何依赖.
+-  imgcache 引用地址 : http://imgcache.gtimg.cn/music/h5/lib/js/module/iSlider-1.0.min.js?_bid=363&max_age=2592000
+-  github: https://github.com/kele527/iSlider
+
+
  * @example
 
+    //极简用法
+    new iSlider(); //容器默认是 .wrap  元素默认是 .item   动画播放class默认是 play
+
     //普通用法
-    iSlider.init({
-        container:'#demo1',
+    new iSlider({
+        wrap:'.wrap',
         item:'.item',
-        onSlide:function () {
-            console.info(this.index)
+        playClass:'play',
+        onslide:function (index) {
+            console.info(index)
         }
     });
-    
 
     //带loading进度条用法
-    iSlider.init({
-        container:'#demo1',
-        onSlide:function () {
-            console.info(this.index)
+    new iSlider({
+        wrap:'.wrap',
+        item:'.item',
+        playClass:'play',
+        onslide:function (index) {
+            console.info(index)
         },
-        loadingId:'#loading',
         loadingImgs:[
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/open_cover.jpg?max_age=2592000',
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/im_cover.jpg?max_age=2592000',
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/bg1.jpg?max_age=2592000',
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/bg2.jpg?max_age=2592000'
         ],
-        preLoadingImgs:[],
-        onLoading:function (complete,total) {
-            this.$('#loading div').style.width=complete/total*100+'%';
+        onloading:function (loaded,total) {
+            this.$('#loading div').style.width=loaded/total*100+'%';
+            if (loaded==total) {
+                this.$('#loading').style.display="none"
+            }
         }
     });
 
-    imgcache引用地址: http://imgcache.gtimg.cn/music/h5/lib/js/module/iSlider-1.0.min.js?_bid=363&max_age=2592000
- * 
- * 
- * 没有依赖
+
  * @date 2014/11/3 星期一
  * @author rowanyang
  * 
@@ -44,95 +66,98 @@
 
 ;(function (win) {
 
-function extend(a,b) {
-    for (var i in b) {
-        a[i]=b[i];
-    }
-    return a;
-}
-
 var raf = function (cb) {setTimeout(function (){cb()},100)};
-
 //android上用了raf也没啥效果  所以只对高富帅用
 if (/iPhone|iPod|iPad/.test(navigator.userAgent)) {
     raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame || raf;
 }
 
-var iSlider = {
-    opts:{
-        speed:400, //滑屏速度
-        triggerDist:30,//触发滑动的手指移动最小位移
+var iSlider = function (opts) {
+    this.opts={
+        wrap:'.wrap',
+        item:'.item',
+        playClass:'play',
+        speed:400, //滑屏速度 单位:ms
+        triggerDist:30,//触发滑动的手指移动最小位移 单位:像素
         isVertical:true,//垂直滑还是水平滑动
-        loadingImgs:[],
+        loadingImgs:[], //loading 预加载图片地址列表
         preLoadingImgs:[],
-        onSlide:function () {},//滑动回调 参数是本对象
-        onLoading:function () {}
-    },
+        onslide:function (index) {},//滑动回调 参数是本对象
+        onloading:function (loaded,total) {},
+        loadingOverTime:15 //预加载超时时间 单位:秒
+    }
+
+    for (var i in opts) {
+        this.opts[i]=opts[i];
+    }
+
+    this.init();
+}
+
+iSlider.prototype={
     wrap:null,
     tplNum:0,
     tpl:[],
     index : 0,
-
     $:function (o) {
         return document.querySelector(o);
     },
-    /**
-     * 组件初始化
-     * @method iSlider.init
-     * @param {object} opts
-     * @param {string} opts.container 容器
-     * @param {string} opts.item  滚动单元的元素
-     * @param {number} [opts.speed] 动画速度
-     * @param {boolean} [opts.isVertical=true] 滑动方向 是否是垂直方向 默认是.
-     * @param {function} [opts.onSlide]  滑动后回调函数
-     * @param {string} [opts.loadingId]  显示loading的容器id
-     * @param {array} [opts.loadingImgs]  loading需要加载的图片地址列表
-     * @param {function} [opts.onLoading]  loading时每加载完成一个图片都会触发这个回调  回调时参数值为 (已加载个数,总数)
-     * 
-     */
-	init:function (opts) {
-		var self = this;
-        extend(this.opts,opts);
-        this.wrap=this.$(this.opts.container);
+    addClass:function (o,cls) {
+        if (o.classList) {
+            o.classList.add(cls)
+        }else {
+            o.className+=' '+cls;
+        }
+    },
+    removeClass:function (o,cls) {
+        if (o.classList) {
+            o.classList.remove(cls)
+        }else {
+            o.className=o.className.replace(new RegExp('\\s*\\b'+cls+'\\b','g'),'')
+        }
+    },
+	init:function () {
+        var self = this;
+        this.wrap=this.$(this.opts.wrap);
 
         this.tpl= this.wrap.cloneNode(true);
-
-        this.tpl=opts.item ? this.tpl.querySelectorAll(opts.item) : this.tpl.children;
+        this.tpl=this.opts.item ? this.tpl.querySelectorAll(this.opts.item) : this.tpl.children;
 
         this.tplNum=this.tpl.length; //总页数数据
-
-		this.touchInitPos = 0;//手指初始位置
-		this.startPos = 0;//移动开始的位置
-		this.totalDist = 0,//移动的总距离
-		this.deltaX1 = 0;//每次移动的正负
-		this.deltaX2 = 0;//每次移动的正负
+        this.touchInitPos = 0;//手指初始位置
+        this.startPos = 0;//移动开始的位置
+        this.totalDist = 0,//移动的总距离
+        this.deltaX1 = 0;//每次移动的正负
+        this.deltaX2 = 0;//每次移动的正负
         
         this.displayWidth = document.documentElement.clientWidth; //图片区域最大宽度
         this.displayHeight = document.documentElement.clientHeight; //图片区域最大高度
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
         
-        this.wrap.innerHTML='';
+        this.wrap.innerHTML=
+            '<div id="current" class="js-iSlider-item '+this.tpl[0].className+'" style="'+this.getTransform(0)+'">'+this.tpl[0].innerHTML+'</div>'+
+            '<div id="next" class="js-iSlider-item '+this.tpl[1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[1].innerHTML+'</div>';
         this.wrap.style.cssText+="display:block;position:relative;width:100%;height:100%";
-        
+
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
             this.loading();
         }else {
             this.pageInit();
         }
 
-		this.$('body').addEventListener('touchstart',function (e) {
-			self.touchstart(e);
-		},false);
-		this.$('body').addEventListener('touchmove',function (e) {
-			self.touchmove(e);
-		},false);
-		this.$('body').addEventListener('touchend',function (e) {
-			self.touchend(e);
-		},false);
-		this.$('body').addEventListener('touchcancel',function (e) {
-			self.touchend(e);
-		},false);
+        this.$('body').addEventListener('touchstart',function (e) {
+            self.touchstart(e);
+        },false);
+        this.$('body').addEventListener('touchmove',function (e) {
+            self.touchmove(e);
+        },false);
+        this.$('body').addEventListener('touchend',function (e) {
+            self.touchend(e);
+        },false);
+        this.$('body').addEventListener('touchcancel',function (e) {
+            self.touchend(e);
+        },false);
 
         document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
 
@@ -140,15 +165,12 @@ var iSlider = {
         s.innerHTML = 'html,body{width:100%;height:100%} .js-iSlider-item{position:absolute;left:0;top:0;width:100%;height:100%}';
         document.head.appendChild(s);
         s = null;
+
 	},
     pageInit:function () {
         var self = this;
-        this.wrap.innerHTML=
-            '<div id="current" class="js-iSlider-item '+this.tpl[0].className+'" style="'+this.getTransform(0)+'">'+this.tpl[0].innerHTML+'</div>'+
-            '<div id="next" class="js-iSlider-item '+this.tpl[1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[1].innerHTML+'</div>';
-
         raf(function () {
-            self.$('#current').className+=' play';
+            self.addClass(self.$('#current'),self.opts.playClass);
         });
     },
 	touchstart : function (e) {
@@ -201,7 +223,6 @@ var iSlider = {
 		this.touchInitPos = currentX;
 	},
 	touchend : function (e) {
-
 		if(this.deltaX2 < -this.opts.triggerDist){
 			this.next();
 		}else if(this.deltaX2 > this.opts.triggerDist){
@@ -214,7 +235,6 @@ var iSlider = {
     getTransform:function (dist) {
         return ';-webkit-transform:translate3d('+(this.opts.isVertical? '0,'+dist : dist+',0')+',0)';
     },
-
     itemReset:function () {
         this.$('#current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
         if (this.$('#prev')) {
@@ -227,11 +247,11 @@ var iSlider = {
     },
 
     prev:function () {
+        var self = this;
         if (!this.$('#current') || !this.$('#prev')) {
             this.itemReset();
             return ;
         }
-        var self = this;
         if (this.index > 0) {
             this.index--;
         }else {
@@ -255,8 +275,11 @@ var iSlider = {
                 self.$('.play').className=self.$('.play').className.replace(/\s*\bplay\b/g,'');
             }
             self.$('#current').className +=' play';
-
-            self.opts.onSlide.call(self);
+            try {
+                self.opts.onslide.call(self,self.index);
+            } catch (e) {
+                console.info(e)
+            }
 
             var prevIndex = self.index-1;
             if (prevIndex < 0) {
@@ -278,12 +301,12 @@ var iSlider = {
     },
 
     next:function () {
+        var self = this;
         if (!this.$('#current') || !this.$('#next')) {
             this.itemReset();
             return ;
         }
 
-        var self = this;
         if (this.index < this.tplNum-1) {
             this.index++;
         }else {
@@ -308,7 +331,11 @@ var iSlider = {
             }
             self.$('#current').className +=' play';
 
-            self.opts.onSlide.call(self);
+            try {
+                self.opts.onslide.call(self,self.index);
+            } catch (e) {
+                console.info(e)
+            }
 
             var nextIndex = self.index+1;
             if (nextIndex >= self.tplNum) {
@@ -329,10 +356,14 @@ var iSlider = {
     loading:function () {
         var self = this;
         var imgurls=this.opts.loadingImgs;
-        var fallback=setTimeout(this.pageInit,15*1000);//超时时间  万一进度条卡那了 15秒后直接显示
+        var fallback=setTimeout(function () {
+            try {
+                self.opts.onloading.call(self,total,total);
+            } catch (e) { }
+            
+            self.pageInit();
+        },this.opts.loadingOverTime*1000);//loading超时时间  万一进度条卡那了 15秒后直接显示
 
-	    this.wrap.appendChild(this.$(this.opts.loadingId));
-        
         var imgs=[], loaded=1;
         var total=imgurls.length+1;
         for (var i=0; i<imgurls.length; i++) {
@@ -344,28 +375,29 @@ var iSlider = {
                     clearTimeout(fallback)
                 }
                 checkloaded();
+                this.onload=this.onerror=this.onabort=null;
             }
         }
 
-        self.opts.onLoading.call(self,1,total);
+        try {
+            self.opts.onloading.call(self,1,total);
+        } catch (e) { }
 
         function checkloaded() {
-            self.opts.onLoading.call(self,loaded,total);
+            try {
+                self.opts.onloading.call(self,loaded,total);
+            } catch (e) { }
             if (loaded==total) {
                 if (fallback) {
                     clearTimeout(fallback)
                 }
                 self.pageInit();
-
                 imgs=null;
                 if (self.opts.preLoadingImgs && self.opts.preLoadingImgs.length) {
                     self.preloading();
                 }
             }
         }
-    },
-    preloading:function () {
-
     }
 
 }

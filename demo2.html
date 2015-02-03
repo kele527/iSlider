@@ -206,13 +206,16 @@
 
 //demo
 //用法
-iSlider.init({
-    container:'#wrap',
+var myslider=new iSlider({
+    wrap:'#wrap',
     item:'.item',
     isVertical:false,
     speed:500,
-    onSlide:function () {
-        document.getElementById('logo_contain').className='logo_contain step-' + (this.index + 1);
+    onslide:function (index) {
+
+        document.querySelector('.mod_tag .current').className=''
+        document.querySelectorAll('.mod_tag li')[index].className='current';
+        document.getElementById('logo_contain').className='logo_contain step-' + (index + 1);
     }
 });
 
