@@ -1,7 +1,8 @@
 
 /**
  * iSlider 通用全屏滑动切换动画组件 
- * @namespace iSlider
+ * @namespace iSlider 
+ * @desc 没有任何依赖
  * @example
 
     //普通用法
@@ -20,23 +21,23 @@
         onSlide:function () {
             console.info(this.index)
         },
-        loadingId:'#loading',
         loadingImgs:[
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/open_cover.jpg?max_age=2592000',
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/im_cover.jpg?max_age=2592000',
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/bg1.jpg?max_age=2592000',
             'http://imgcache.gtimg.cn/mediastyle/mobile/event/20141118_ten_jason/img/bg2.jpg?max_age=2592000'
         ],
-        preLoadingImgs:[],
         onLoading:function (complete,total) {
             this.$('#loading div').style.width=complete/total*100+'%';
+            if (complete==total) {
+                this.$('#loading').style.display="none"
+            }
         }
     });
 
     imgcache引用地址: http://imgcache.gtimg.cn/music/h5/lib/js/module/iSlider-1.0.min.js?_bid=363&max_age=2592000
  * 
  * 
- * 没有依赖
  * @date 2014/11/3 星期一
  * @author rowanyang
  * 
@@ -56,7 +57,7 @@ var iSlider = {
         speed:400, //滑屏速度
         triggerDist:30,//触发滑动的手指移动最小位移
         isVertical:true,//垂直滑还是水平滑动
-        loadingImgs:[],
+        loadingImgs:[], //loading 预加载图片地址列表
         preLoadingImgs:[],
         onSlide:function () {},//滑动回调 参数是本对象
         onLoading:function () {}
