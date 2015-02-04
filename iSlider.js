@@ -85,6 +85,7 @@ var iSlider = function (opts) {
         speed:400, //滑屏速度 单位:ms
         triggerDist:30,//触发滑动的手指移动最小位移 单位:像素
         isVertical:true,//垂直滑还是水平滑动
+        useACC:true, //是否启用硬件加速 默认启用
         loadingImgs:[], //loading 预加载图片地址列表
         preLoadingImgs:[],
         onslide:function (index) {},//滑动回调 参数是本对象
@@ -125,7 +126,7 @@ iSlider.prototype={
         var self = this;
         //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
         this.index=parseInt(sessionStorage[sessionKey]) || this.opts.index || 0;
-console.info(sessionStorage[sessionKey])
+
         this.wrap=this.$(this.opts.wrap);
 
         this.tpl= this.wrap.cloneNode(true);
@@ -138,15 +139,15 @@ console.info(sessionStorage[sessionKey])
         this.deltaX1 = 0;//每次移动的正负
         this.deltaX2 = 0;//每次移动的正负
 
-        this.displayWidth = document.documentElement.clientWidth; //图片区域最大宽度
-        this.displayHeight = document.documentElement.clientHeight; //图片区域最大高度
+        this.displayWidth = this.wrap.clientWidth; //滑动区域最大宽度
+        this.displayHeight = this.wrap.clientHeight; //滑动区域最大高度
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
         
         this.wrap.innerHTML=
-            (this.index>0?'<div id="prev" class="js-iSlider-item '+this.tpl[this.index-1].className+'" style="'+this.getTransform('-100%')+'">'+this.tpl[this.index-1].innerHTML+'</div>':'')+
-            '<div id="current" class="js-iSlider-item '+this.tpl[this.index].className+'" style="'+this.getTransform(0)+'">'+this.tpl[this.index].innerHTML+'</div>'+
-            (this.index<this.tplNum-1?'<div id="next" class="js-iSlider-item '+this.tpl[this.index+1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[this.index+1].innerHTML+'</div>':'');
+            (this.index>0?'<div id="i-prev" class="js-iSlider-item '+this.tpl[this.index-1].className+'" style="'+this.getTransform('-100%')+'">'+this.tpl[this.index-1].innerHTML+'</div>':'')+
+            '<div id="i-current" class="js-iSlider-item '+this.tpl[this.index].className+'" style="'+this.getTransform(0)+'">'+this.tpl[this.index].innerHTML+'</div>'+
+            (this.index<this.tplNum-1?'<div id="i-next" class="js-iSlider-item '+this.tpl[this.index+1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[this.index+1].innerHTML+'</div>':'');
         this.wrap.style.cssText+="display:block;position:relative;width:100%;height:100%";
 
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
@@ -179,7 +180,7 @@ console.info(sessionStorage[sessionKey])
     pageInit:function () {
         var self = this;
         raf(function () {
-            self.addClass(self.$('#current'),self.opts.playClass);
+            self.addClass(self.$('#i-current'),self.opts.playClass);
         });
         try {
             self.opts.onslide.call(self,self.index);
@@ -200,16 +201,16 @@ console.info(sessionStorage[sessionKey])
 		this.startPos = 0;
 		this.startPosPrev = -this.scrollDist;
 		this.startPosNext = this.scrollDist;
-		this.hasPrev = !!this.$('#prev');
-		this.hasNext = !!this.$('#next');
+		this.hasPrev = !!this.$('#i-prev');
+		this.hasNext = !!this.$('#i-next');
 		//手指滑动的时候禁用掉动画
 		if (this.hasNext) {
-			this.$('#next').style.cssText+='-webkit-transition-duration:0;'
+			this.$('#i-next').style.cssText+='-webkit-transition-duration:0;'
 		}
 
-		this.$('#current').style.cssText+='-webkit-transition-duration:0;'
+		this.$('#i-current').style.cssText+='-webkit-transition-duration:0;'
 		if (this.hasPrev) {
-			this.$('#prev').style.cssText+='-webkit-transition-duration:0;'
+			this.$('#i-prev').style.cssText+='-webkit-transition-duration:0;'
 		}
 	},
 	touchmove : function (e) {
@@ -236,7 +237,7 @@ console.info(sessionStorage[sessionKey])
 		this.deltaX2 = currentX - this.deltaX1;//记录当次移动的偏移量
 		this.totalDist = this.startPos + currentX - this.touchInitPos;
 
-		this.$('#current').style.cssText+=this.getTransform(this.totalDist+'px');
+		this.$('#i-current').style.cssText+=this.getTransform(this.totalDist+'px');
 		this.startPos = this.totalDist;
 		
 		//处理上一张和下一张
@@ -244,14 +245,14 @@ console.info(sessionStorage[sessionKey])
 			if (this.hasNext) {
 				this.totalDist2 = this.startPosNext + currentX - this.touchInitPos;
 
-				this.$('#next').style.cssText += this.getTransform(this.totalDist2+'px');
+				this.$('#i-next').style.cssText += this.getTransform(this.totalDist2+'px');
 				this.startPosNext = this.totalDist2;
 			}
 		}else {//露出上一张
 			if (this.hasPrev) {
 				this.totalDist2 = this.startPosPrev + currentX - this.touchInitPos;
 
-				this.$('#prev').style.cssText += this.getTransform(this.totalDist2+'px');
+				this.$('#i-prev').style.cssText += this.getTransform(this.totalDist2+'px');
 				this.startPosPrev = this.totalDist2;
 			}
 		}
@@ -269,26 +270,24 @@ console.info(sessionStorage[sessionKey])
 		this.deltaX2 = 0;
 	},
     getTransform:function (dist) {
-        return ';-webkit-transform:translate3d('+(this.opts.isVertical? '0,'+dist : dist+',0')+',0)';
+        var pos= this.opts.isVertical? '0,'+dist : dist+',0';
+        return ';-webkit-transform:' + (this.opts.useACC ? 'translate3d('+pos+',0)' : 'translate('+pos+')');
     },
-//    slideTo:function (index) {
-//        this.index=index;
-//        this.next();
-//    },
+
     itemReset:function () {
-        this.$('#current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
-        if (this.$('#prev')) {
-            this.$('#prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform('-'+this.scrollDist+'px');
+        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
+        if (this.$('#i-prev')) {
+            this.$('#i-prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform('-'+this.scrollDist+'px');
         }
-        if (this.$('#next')) {
-           this.$('#next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(this.scrollDist+'px');
+        if (this.$('#i-next')) {
+           this.$('#i-next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(this.scrollDist+'px');
         }
 		this.deltaX2 = 0;
     },
 
     prev:function () {
         var self = this;
-        if (!this.$('#current') || !this.$('#prev')) {
+        if (!this.$('#i-current') || !this.$('#i-prev')) {
             this.itemReset();
             return ;
         }
@@ -301,22 +300,23 @@ console.info(sessionStorage[sessionKey])
 
         var nextIndex = this.index+1 > this.tplNum-1 ? 0 : this.index+1;
 
-        if (this.$('#next')) {
-            this.wrap.removeChild(this.$('#next'));
+        if (this.$('#i-next')) {
+            this.wrap.removeChild(this.$('#i-next'));
         }
-        this.$('#current').id='next';
-        this.$('#prev').id='current';
-        this.$('#next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(this.scrollDist+'px');
-        this.$('#current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
+        this.$('#i-current').id='i-next';
+        this.$('#i-prev').id='i-current';
+        this.$('#i-next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(this.scrollDist+'px');
+        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
 
         sessionStorage[sessionKey]=this.index;
 
         raf(function () {
 
-            if (self.$('.play')) {
-                self.$('.play').className=self.$('.play').className.replace(/\s*\bplay\b/g,'');
+            if (self.$('.'+self.opts.playClass)) {
+                self.removeClass(self.$('.'+self.opts.playClass),self.opts.playClass)
             }
-            self.$('#current').className +=' play';
+            self.addClass(self.$('#i-current'),self.opts.playClass)
+
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
@@ -331,12 +331,12 @@ console.info(sessionStorage[sessionKey])
 
             var addItem = document.createElement('div');
             addItem.className='js-iSlider-item '+self.tpl[prevIndex].className;
-            addItem.id='prev';
+            addItem.id='i-prev';
             addItem.style.cssText+='-webkit-transition-duration:0ms;'+self.getTransform('-'+self.scrollDist+'px');
 
             addItem.innerHTML=self.tpl[prevIndex].innerHTML;
 
-            self.wrap.insertBefore(addItem,self.$('#current'));
+            self.wrap.insertBefore(addItem,self.$('#i-current'));
 
         })
 
@@ -344,7 +344,7 @@ console.info(sessionStorage[sessionKey])
 
     next:function () {
         var self = this;
-        if (!this.$('#current') || !this.$('#next')) {
+        if (!this.$('#i-current') || !this.$('#i-next')) {
             this.itemReset();
             return ;
         }
@@ -358,20 +358,20 @@ console.info(sessionStorage[sessionKey])
         
         var prevIndex = this.index===0 ? this.tplNum-1 : this.index-1;
 
-        if (this.$('#prev')) {
-            this.wrap.removeChild(this.$('#prev'));
+        if (this.$('#i-prev')) {
+            this.wrap.removeChild(this.$('#i-prev'));
         }
-        this.$('#current').id='prev';
-        this.$('#next').id='current';
-        this.$('#prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform('-'+this.scrollDist+'px');
-        this.$('#current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
+        this.$('#i-current').id='i-prev';
+        this.$('#i-next').id='i-current';
+        this.$('#i-prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform('-'+this.scrollDist+'px');
+        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
         sessionStorage[sessionKey]=this.index;
         raf(function () {
 
-            if (self.$('.play')) {
-                self.$('.play').className=self.$('.play').className.replace(/\s*\bplay\b/g,'');
+            if (self.$('.'+self.opts.playClass)) {
+                self.removeClass(self.$('.'+self.opts.playClass),self.opts.playClass)
             }
-            self.$('#current').className +=' play';
+            self.addClass(self.$('#i-current'),self.opts.playClass)
 
             try {
                 self.opts.onslide.call(self,self.index);
@@ -386,7 +386,7 @@ console.info(sessionStorage[sessionKey])
 
             var addItem = document.createElement('div');
             addItem.className='js-iSlider-item '+self.tpl[nextIndex].className;
-            addItem.id='next';
+            addItem.id='i-next';
             addItem.style.cssText+='-webkit-transition-duration:0ms;'+self.getTransform(self.scrollDist+'px');
             addItem.innerHTML=self.tpl[nextIndex].innerHTML;
 
