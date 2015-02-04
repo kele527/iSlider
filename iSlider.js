@@ -1,6 +1,7 @@
+
 /**
  * iSlider 通用全屏滑动切换动画组件 
- * @class iSlider 
+ * @class iSlider
  * @param {object} opts
  * @param {string} opts.wrap='.wrap' 容器 
  * @param {string} opts.item='.item'  滚动单元的元素
@@ -10,6 +11,7 @@
  * @param {number} [opts.speed=400] 动画速度 单位:ms
  * @param {number} [opts.triggerDist=30] 触发滑动的手指移动最小位移 单位:像素
  * @param {boolean} [opts.isVertical=true] 滑动方向 是否是垂直方向 默认是.
+ * @param {boolean} [opts.lastLocate=true] 后退后定位到上次浏览的位置 默认true
  * @param {function} [opts.onslide]  滑动后回调函数
  * @param {array} [opts.loadingImgs]  loading需要加载的图片地址列表
  * @param {function} [opts.onloading]  loading时每加载完成一个图片都会触发这个回调  回调时参数值为 (已加载个数,总数)
@@ -59,25 +61,14 @@
             }
         }
     });
+
     demo http://kele527.github.io/iSlider/demo1.html
 
  * @date 2014/11/3 星期一
  * @author rowanyang
  * 
  */
-
-;(function (win) {
-
-var raf = function (cb) {setTimeout(function (){cb()},150)};
-//android上用了raf也没啥效果  所以只对高富帅用
-if (/iPhone|iPod|iPad/.test(navigator.userAgent)) {
-    raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame || raf;
-}
-
-//记录当前浏览的页码,  后退的时候用
-var sessionKey = location.host+location.pathname;
-
-var iSlider = function (opts) {
+function iSlider(opts) {
     this.opts={
         wrap:'.wrap',
         item:'.item',
@@ -86,6 +77,7 @@ var iSlider = function (opts) {
         triggerDist:30,//触发滑动的手指移动最小位移 单位:像素
         isVertical:true,//垂直滑还是水平滑动
         useACC:true, //是否启用硬件加速 默认启用
+        lastLocate:true, //后退后定位到上次浏览的位置 默认开启
         loadingImgs:[], //loading 预加载图片地址列表
         preLoadingImgs:[],
         onslide:function (index) {},//滑动回调 参数是本对象
@@ -99,12 +91,14 @@ var iSlider = function (opts) {
 
     this.init();
 }
-
+/**  @lends iSlider */
 iSlider.prototype={
     wrap:null,
     tplNum:0,
     tpl:[],
     index : 0,
+    _delayTime:150,
+    _sessionKey : location.host+location.pathname,
     $:function (o) {
         return document.querySelector(o);
     },
@@ -125,7 +119,8 @@ iSlider.prototype={
 	init:function () {
         var self = this;
         //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
-        this.index=parseInt(sessionStorage[sessionKey]) || this.opts.index || 0;
+        var lastLocateIndex=parseInt(sessionStorage[this._sessionKey]);
+        this.index = ((this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0) || this.opts.index || 0;
 
         this.wrap=this.$(this.opts.wrap);
 
@@ -143,52 +138,64 @@ iSlider.prototype={
         this.displayHeight = this.wrap.clientHeight; //滑动区域最大高度
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
-        
-        this.wrap.innerHTML=
-            (this.index>0?'<div id="i-prev" class="js-iSlider-item '+this.tpl[this.index-1].className+'" style="'+this.getTransform('-100%')+'">'+this.tpl[this.index-1].innerHTML+'</div>':'')+
-            '<div id="i-current" class="js-iSlider-item '+this.tpl[this.index].className+'" style="'+this.getTransform(0)+'">'+this.tpl[this.index].innerHTML+'</div>'+
-            (this.index<this.tplNum-1?'<div id="i-next" class="js-iSlider-item '+this.tpl[this.index+1].className+'" style="'+this.getTransform('100%')+'">'+this.tpl[this.index+1].innerHTML+'</div>':'');
+
+        this._setHTML();
         this.wrap.style.cssText+="display:block;position:relative;width:100%;height:100%";
 
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
-            this.loading();
+            this._loading();
         }else {
-            this.pageInit();
+            this._pageInit();
         }
 
-        this.$('body').addEventListener('touchstart',function (e) {
-            self.touchstart(e);
-        },false);
-        this.$('body').addEventListener('touchmove',function (e) {
-            self.touchmove(e);
-        },false);
-        this.$('body').addEventListener('touchend',function (e) {
-            self.touchend(e);
-        },false);
-        this.$('body').addEventListener('touchcancel',function (e) {
-            self.touchend(e);
-        },false);
-
-        document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
-
+        if (/iPhone|iPod|iPad/.test(navigator.userAgent)) {
+            this._delayTime=50;
+        }
         var s = document.createElement('style');
         s.innerHTML = 'html,body{width:100%;height:100%} .js-iSlider-item{position:absolute;left:0;top:0;width:100%;height:100%}';
         document.head.appendChild(s);
         s = null;
 
+        this._bindEvt();
 	},
-    pageInit:function () {
+    _bindEvt:function () {
         var self = this;
-        raf(function () {
+        this.$('body').addEventListener('touchstart',function (e) {
+            self._touchstart(e);
+        },false);
+        this.$('body').addEventListener('touchmove',function (e) {
+            self._touchmove(e);
+        },false);
+        this.$('body').addEventListener('touchend',function (e) {
+            self._touchend(e);
+        },false);
+        this.$('body').addEventListener('touchcancel',function (e) {
+            self._touchend(e);
+        },false);
+
+        document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+    },
+    _setHTML:function (index) {
+        if (index>=0) {
+            this.index=index;
+        }
+        this.wrap.innerHTML=
+            (this.index>0?'<div id="i-prev" class="js-iSlider-item '+this.tpl[this.index-1].className+'" style="'+this._getTransform('-100%')+'">'+this.tpl[this.index-1].innerHTML+'</div>':'')+
+            '<div id="i-current" class="js-iSlider-item '+this.tpl[this.index].className+'" style="'+this._getTransform(0)+'">'+this.tpl[this.index].innerHTML+'</div>'+
+            (this.index<this.tplNum-1?'<div id="i-next" class="js-iSlider-item '+this.tpl[this.index+1].className+'" style="'+this._getTransform('100%')+'">'+this.tpl[this.index+1].innerHTML+'</div>':'');
+    },
+    _pageInit:function () {
+        var self = this;
+        setTimeout(function () {
             self.addClass(self.$('#i-current'),self.opts.playClass);
-        });
+        },this._delayTime);
         try {
             self.opts.onslide.call(self,self.index);
         } catch (e) {
             console.info(e)
         }
     },
-	touchstart : function (e) {
+	_touchstart : function (e) {
 		if(e.touches.length !== 1){return;}//如果大于1个手指，则不处理
         
         this.lockSlide=false;
@@ -213,7 +220,7 @@ iSlider.prototype={
 			this.$('#i-prev').style.cssText+='-webkit-transition-duration:0;'
 		}
 	},
-	touchmove : function (e) {
+	_touchmove : function (e) {
 		if(e.touches.length !== 1 || this.lockSlide){return;}
 
         var gx=Math.abs(e.touches[0].pageX - this._touchstartX);
@@ -237,7 +244,7 @@ iSlider.prototype={
 		this.deltaX2 = currentX - this.deltaX1;//记录当次移动的偏移量
 		this.totalDist = this.startPos + currentX - this.touchInitPos;
 
-		this.$('#i-current').style.cssText+=this.getTransform(this.totalDist+'px');
+		this.$('#i-current').style.cssText+=this._getTransform(this.totalDist+'px');
 		this.startPos = this.totalDist;
 		
 		//处理上一张和下一张
@@ -245,157 +252,47 @@ iSlider.prototype={
 			if (this.hasNext) {
 				this.totalDist2 = this.startPosNext + currentX - this.touchInitPos;
 
-				this.$('#i-next').style.cssText += this.getTransform(this.totalDist2+'px');
+				this.$('#i-next').style.cssText += this._getTransform(this.totalDist2+'px');
 				this.startPosNext = this.totalDist2;
 			}
 		}else {//露出上一张
 			if (this.hasPrev) {
 				this.totalDist2 = this.startPosPrev + currentX - this.touchInitPos;
 
-				this.$('#i-prev').style.cssText += this.getTransform(this.totalDist2+'px');
+				this.$('#i-prev').style.cssText += this._getTransform(this.totalDist2+'px');
 				this.startPosPrev = this.totalDist2;
 			}
 		}
 
 		this.touchInitPos = currentX;
 	},
-	touchend : function (e) {
+	_touchend : function (e) {
 		if(this.deltaX2 < -this.opts.triggerDist){
 			this.next();
 		}else if(this.deltaX2 > this.opts.triggerDist){
 			this.prev();
 		}else{
-			this.itemReset();
+			this._itemReset();
 		}
 		this.deltaX2 = 0;
 	},
-    getTransform:function (dist) {
+    _getTransform:function (dist) {
         var pos= this.opts.isVertical? '0,'+dist : dist+',0';
         return ';-webkit-transform:' + (this.opts.useACC ? 'translate3d('+pos+',0)' : 'translate('+pos+')');
     },
 
-    itemReset:function () {
-        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
+    _itemReset:function () {
+        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(0);
         if (this.$('#i-prev')) {
-            this.$('#i-prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform('-'+this.scrollDist+'px');
+            this.$('#i-prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform('-'+this.scrollDist+'px');
         }
         if (this.$('#i-next')) {
-           this.$('#i-next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(this.scrollDist+'px');
+           this.$('#i-next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(this.scrollDist+'px');
         }
 		this.deltaX2 = 0;
     },
 
-    prev:function () {
-        var self = this;
-        if (!this.$('#i-current') || !this.$('#i-prev')) {
-            this.itemReset();
-            return ;
-        }
-        if (this.index > 0) {
-            this.index--;
-        }else {
-            this.itemReset();
-            return false;
-        }
-
-        var nextIndex = this.index+1 > this.tplNum-1 ? 0 : this.index+1;
-
-        if (this.$('#i-next')) {
-            this.wrap.removeChild(this.$('#i-next'));
-        }
-        this.$('#i-current').id='i-next';
-        this.$('#i-prev').id='i-current';
-        this.$('#i-next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(this.scrollDist+'px');
-        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
-
-        sessionStorage[sessionKey]=this.index;
-
-        raf(function () {
-
-            if (self.$('.'+self.opts.playClass)) {
-                self.removeClass(self.$('.'+self.opts.playClass),self.opts.playClass)
-            }
-            self.addClass(self.$('#i-current'),self.opts.playClass)
-
-            try {
-                self.opts.onslide.call(self,self.index);
-            } catch (e) {
-                console.info(e)
-            }
-
-            var prevIndex = self.index-1;
-            if (prevIndex < 0) {
-                prevIndex =  self.tplNum-1;
-                return false;
-            }
-
-            var addItem = document.createElement('div');
-            addItem.className='js-iSlider-item '+self.tpl[prevIndex].className;
-            addItem.id='i-prev';
-            addItem.style.cssText+='-webkit-transition-duration:0ms;'+self.getTransform('-'+self.scrollDist+'px');
-
-            addItem.innerHTML=self.tpl[prevIndex].innerHTML;
-
-            self.wrap.insertBefore(addItem,self.$('#i-current'));
-
-        })
-
-    },
-
-    next:function () {
-        var self = this;
-        if (!this.$('#i-current') || !this.$('#i-next')) {
-            this.itemReset();
-            return ;
-        }
-
-        if (this.index < this.tplNum-1) {
-            this.index++;
-        }else {
-            this.itemReset();
-            return false;
-        }
-        
-        var prevIndex = this.index===0 ? this.tplNum-1 : this.index-1;
-
-        if (this.$('#i-prev')) {
-            this.wrap.removeChild(this.$('#i-prev'));
-        }
-        this.$('#i-current').id='i-prev';
-        this.$('#i-next').id='i-current';
-        this.$('#i-prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform('-'+this.scrollDist+'px');
-        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this.getTransform(0);
-        sessionStorage[sessionKey]=this.index;
-        raf(function () {
-
-            if (self.$('.'+self.opts.playClass)) {
-                self.removeClass(self.$('.'+self.opts.playClass),self.opts.playClass)
-            }
-            self.addClass(self.$('#i-current'),self.opts.playClass)
-
-            try {
-                self.opts.onslide.call(self,self.index);
-            } catch (e) {
-                console.info(e)
-            }
-
-            var nextIndex = self.index+1;
-            if (nextIndex >= self.tplNum) {
-                return false;
-            }
-
-            var addItem = document.createElement('div');
-            addItem.className='js-iSlider-item '+self.tpl[nextIndex].className;
-            addItem.id='i-next';
-            addItem.style.cssText+='-webkit-transition-duration:0ms;'+self.getTransform(self.scrollDist+'px');
-            addItem.innerHTML=self.tpl[nextIndex].innerHTML;
-
-            self.wrap.appendChild(addItem);
-
-        })
-
-    },
-    loading:function () {
+    _loading:function () {
         var self = this;
         var imgurls=this.opts.loadingImgs;
         var fallback=setTimeout(function () {
@@ -403,7 +300,7 @@ iSlider.prototype={
                 self.opts.onloading.call(self,total,total);
             } catch (e) { }
             
-            self.pageInit();
+            self._pageInit();
         },this.opts.loadingOverTime*1000);//loading超时时间  万一进度条卡那了 15秒后直接显示
 
         var imgs=[], loaded=1;
@@ -433,13 +330,143 @@ iSlider.prototype={
                 if (fallback) {
                     clearTimeout(fallback)
                 }
-                self.pageInit();
+                self._pageInit();
                 imgs=null;
                 if (self.opts.preLoadingImgs && self.opts.preLoadingImgs.length) {
                     self.preloading();
                 }
             }
         }
+    },
+    /** 
+     * 滑动到上一页
+     * @example
+        s1.prev();
+     */
+    prev:function () {
+        var self = this;
+        if (!this.$('#i-current') || !this.$('#i-prev')) {
+            this._itemReset();
+            return ;
+        }
+        if (this.index > 0) {
+            this.index--;
+        }else {
+            this._itemReset();
+            return false;
+        }
+
+        var nextIndex = this.index+1 > this.tplNum-1 ? 0 : this.index+1;
+
+        if (this.$('#i-next')) {
+            this.wrap.removeChild(this.$('#i-next'));
+        }
+        this.$('#i-current').id='i-next';
+        this.$('#i-prev').id='i-current';
+        this.$('#i-next').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(this.scrollDist+'px');
+        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(0);
+
+        sessionStorage[this._sessionKey]=this.index;
+
+        setTimeout(function () {
+
+            if (self.$('.'+self.opts.playClass)) {
+                self.removeClass(self.$('.'+self.opts.playClass),self.opts.playClass)
+            }
+            self.addClass(self.$('#i-current'),self.opts.playClass)
+
+            try {
+                self.opts.onslide.call(self,self.index);
+            } catch (e) {
+                console.info(e)
+            }
+
+            var prevIndex = self.index-1;
+            if (prevIndex < 0) {
+                prevIndex =  self.tplNum-1;
+                return false;
+            }
+
+            var addItem = document.createElement('div');
+            addItem.className='js-iSlider-item '+self.tpl[prevIndex].className;
+            addItem.id='i-prev';
+            addItem.style.cssText+='-webkit-transition-duration:0ms;'+self._getTransform('-'+self.scrollDist+'px');
+
+            addItem.innerHTML=self.tpl[prevIndex].innerHTML;
+
+            self.wrap.insertBefore(addItem,self.$('#i-current'));
+
+        },this._delayTime)
+
+    },
+
+    /** 
+     * 滑动到下一页
+     * @example
+        s1.next();
+     */
+    next:function () {
+        var self = this;
+        if (!this.$('#i-current') || !this.$('#i-next')) {
+            this._itemReset();
+            return ;
+        }
+
+        if (this.index < this.tplNum-1) {
+            this.index++;
+        }else {
+            this._itemReset();
+            return false;
+        }
+        
+        var prevIndex = this.index===0 ? this.tplNum-1 : this.index-1;
+
+        if (this.$('#i-prev')) {
+            this.wrap.removeChild(this.$('#i-prev'));
+        }
+        this.$('#i-current').id='i-prev';
+        this.$('#i-next').id='i-current';
+        this.$('#i-prev').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform('-'+this.scrollDist+'px');
+        this.$('#i-current').style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(0);
+        sessionStorage[this._sessionKey]=this.index;
+        setTimeout(function () {
+
+            if (self.$('.'+self.opts.playClass)) {
+                self.removeClass(self.$('.'+self.opts.playClass),self.opts.playClass)
+            }
+            self.addClass(self.$('#i-current'),self.opts.playClass)
+
+            try {
+                self.opts.onslide.call(self,self.index);
+            } catch (e) {
+                console.info(e)
+            }
+
+            var nextIndex = self.index+1;
+            if (nextIndex >= self.tplNum) {
+                return false;
+            }
+
+            var addItem = document.createElement('div');
+            addItem.className='js-iSlider-item '+self.tpl[nextIndex].className;
+            addItem.id='i-next';
+            addItem.style.cssText+='-webkit-transition-duration:0ms;'+self._getTransform(self.scrollDist+'px');
+            addItem.innerHTML=self.tpl[nextIndex].innerHTML;
+
+            self.wrap.appendChild(addItem);
+
+        },this._delayTime)
+
+    },
+    /** 
+     * 跳转到指定页码
+     * @param {number} index 页码 从0开始的
+     * @example
+        s1.slideTo(3);
+     */
+    slideTo:function (index) {
+        this._setHTML(index);
+        this._pageInit();
     }
 
 }
@@ -447,7 +474,6 @@ iSlider.prototype={
 if (typeof module == 'object') {
     module.exports=iSlider;
 }else {
-    win.iSlider=iSlider;
+    window.iSlider=iSlider;
 }
 
-})(window);
