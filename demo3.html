@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>QQ音乐MV进阶体验</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+<link rel="stylesheet" href="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/index.css?max_age=2592000" />
+<style type="text/css">
+.mod_loading .content .progress span{-webkit-transition:width 0.4s linear;}
+</style>
+</head>
+<body class="bodybox">
+
+<div class="wrap" id="wrap">
+
+    <div class="item item-1">
+        <div class="box">
+            <div class="invite">
+                <div class="open_bg_before"></div>
+                <div class="open_bg_after"></div>
+                <div class="open_content"></div>
+                <div class="logo"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="item item-2" style="display: none">
+        <div class="box">
+            <p class="mod_text">小时候 我们与世界相隔10000公里</p>
+            <div class="mod_video js-play-mv" data-vid="u00156bge4r" data-mvname="Beat It" data-mvsinger="Michael Jackson">
+                <img src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/video_bg_1.png"/>
+                <a class="btn_play" href="javascript:;">播放</a>
+            </div>
+            <img class="mod_des_bg" src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/des_bg_1.png"/>
+        </div>
+    </div>
+
+    <div class="item item-3" style="display: none">
+        <div class="box">
+            <p class="mod_text">长大后 1米长的网线将我们连接到一起  </p>
+            <div class="mod_video js-play-mv" data-vid="n0015g6qpkn" data-mvname="Till The World Ends" data-mvsinger="Britney Spears">
+                <img src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/video_bg_2.png"/>
+                <a class="btn_play" href="javascript:;">播放</a>
+            </div>
+            <img class="mod_des_bg" src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/des_bg_2.png"/>
+        </div>
+    </div>
+
+    <div class="item item-4" style="display: none">
+        <div class="box">
+            <p class="mod_text">现在，QQ音乐让你与世界 仅有一个指尖的距离  </p>
+            <div class="mod_video js-play-mv" data-vid="m0015ha2gvj" data-mvname="Blank Space" data-mvsinger="Taylor Swift">
+                <img src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/video_bg_3.png"/>
+                <a class="btn_play" href="javascript:;">播放</a>
+            </div>
+            <img class="mod_des_bg" src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/des_bg_3.png"/>
+        </div>
+    </div>
+
+    <div class="item item-5" style="display: none">
+        <div class="box">
+            <h2 class="mod_title hide">弹指间 看世界</h2>
+            <img src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/text_special.png"/>
+            <a class="mod_btn btn_try js-play-mv" href="javascript:;" data-vid="i0015pdobwk" data-mvname="Uptown Funk" data-mvsinger="Mark Ronson">立即体验双语MV</a>
+            <p class="tips">
+                <span>TIPS：</span>立即打开QQ音乐客户端搜索"双语MV"<br/>即可体验更多双语MV 
+            </p >
+        </div>
+    </div>
+
+    <div class="item item-6" style="display: none">
+        <div class="box">
+            <h2 class="mod_title">有奖活动</h2>
+            <div class="rules">
+                <h3>活动规则</h3>
+                <p>1、将页面分享至朋友圈，并截图发送至QQ音乐公众号（qqmusic）</p>
+                <p>2、活动时间：2015年2月3日-2月15日</p>
+                <p>3、中奖用户我们将通过微信通知，24小时内未回复则视为放弃中奖资格</p>
+                <p>4、改成腾讯公司保留在法律规定的范围内对上述规则进行解释的权利</p>
+            </div>        
+            <a class="mod_btn btn_share" href="javascript:;">分享有奖</a>
+            <div class="gift">
+                <h3>活动奖品</h3>
+                <p>腾讯羊年公仔3个；正版CD专辑10张；年费绿钻10个</p>
+                <img src="http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/gift.png"/>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 加载提示 _S -->
+<div class="mod_loading" id="loading">
+    <div class="content">
+        <div class="progress"><span id="progress_bg" style="width:0;"></span></div>
+        <p>Loading...</p>
+    </div>
+</div>
+<!-- 加载提示 _E -->
+
+<!-- 播放状态 _S -->
+<div class="icon_sound off js-btn-bgsong"><i></i></div>
+<!-- 播放状态 _E -->
+
+<!-- 滑块 _S -->
+<div class="global">
+    <div class="slider"><span></span></div>
+</div>
+<!-- 滑块 _E -->
+<script type="text/javascript">
+window.debug=true;
+</script>
+
+<script type="text/javascript" src="http://imgcache.gtimg.cn/music/h5/lib/js/zepto-1.0.min.js?_bid=299&max_age=2592000"></script>
+<script type="text/javascript" src="http://imgcache.gtimg.cn/music/h5/lib/js/music-1.0.min.js?_bid=299&max_age=2592000"></script>
+<script type="text/javascript" src="iSlider.js"></script>
+
+<script>
+
+var myslider=new iSlider({
+    index:0,
+    loadingImgs:[
+        'http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/open_content.png?d=20150203165217',
+        'http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/invite_bg.png?d=20150203165217',
+        'http://imgcache.gtimg.cn/mediastyle/mobile/event/20150129_double_language_mv/img/open_bg_after.png?d=20150203165217'
+    ],
+    onloading:function (complete,total) {
+        this.$('#progress_bg').style.width=complete/total*100+'%';
+        if (complete==total) {
+            this.$('#loading').style.display="none"
+        }
+    }
+});
+
+$('.wrap').on('tap','.mod_des_bg',function () {
+    location.href='http://y.qq.com/iSlider/demo2.html'
+})
+
+
+//背景音乐模块
+var bgsongid='464695';
+
+if ($.browser.music) {
+
+    M.musicReady(function () {
+
+        $('.js-btn-bgsong').on('touchstart',function () {
+            if ($(this).hasClass('off')) {
+                M.bridge.callHandler("music_resume",{}, function(res){ });
+            }else {
+                M.bridge.callHandler("music_pause",{}, function(res){ });
+            }
+        })
+
+        M.bridge.callHandler("query_songinfo",{}, function(res){
+
+            M.bridge.callHandler('23', {
+                'k1'		: 0,
+                'k2'		: bgsongid,
+                'action'	: 'backplay',
+                'actionp'	: {}
+            }, function(data){
+
+            })
+
+            if (res.code==0 && res.data) {
+                if (res.data.state=='pause') {
+                    $('.js-btn-bgsong').addClass('off')
+                }else {
+                    $('.js-btn-bgsong').removeClass('off')
+                }
+            }
+            $('.js-btn-bgsong').show();
+        });
+
+
+        M.bridge.onAPP("register_musicstate", function(res){
+            if (res.code==0 && res.data) {
+                if (res.data.state=='pause') {
+                    $('.js-btn-bgsong').addClass('off')
+                }else {
+                    $('.js-btn-bgsong').removeClass('off')
+                }
+            }
+        });
+    })
+}else {
+    
+    if (!M.audio) {
+        M.audio = document.createElement('audio');
+        document.body.appendChild(M.audio);
+    }
+
+    M.audio.src='http://ws.stream.qqmusic.qq.com/'+bgsongid+'.m4a?fromtag=30';
+
+
+    $(M.audio).on('pause',function () {
+        $('.js-btn-bgsong').addClass('off')
+    }).on('playing',function () {
+        $('.js-btn-bgsong').removeClass('off');
+    }).on('canplay',function () { //android2.3 不能直接播放  只能在canplay的时候 调用play()
+        M.audio.play();
+    });
+
+    $('.js-btn-bgsong').on('touchstart', function (e) {
+        e.preventDefault();
+        if (/off/.test(this.className)) {
+            M.audio.play();
+            $('.js-btn-bgsong').addClass('off')
+        }else {
+            M.audio.pause();
+            $('.js-btn-bgsong').removeClass('off');
+        }
+        return false;
+    });
+
+    $(document).on('touchstart',function () {
+        M.audio.play();
+    })
+
+}
+
+function base64Encode(input) {
+    var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    var output = "";
+    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+    var i = 0;
+
+    var string = input.replace(/\r\n/g, "\n");
+
+    input = "";
+    for (var n = 0; n < string.length; n++) {
+        var c = string.charCodeAt(n);
+        if (c < 128) {
+            input += String.fromCharCode(c);
+        } else if (c > 127 && c < 2048) {
+            input += String.fromCharCode(c >> 6 | 192);
+            input += String.fromCharCode(c & 63 | 128);
+        } else {
+            input += String.fromCharCode(c >> 12 | 224);
+            input += String.fromCharCode(c >> 6 & 63 | 128);
+            input += String.fromCharCode(c & 63 | 128);
+        }
+    }
+
+    while (i < input.length) {
+        chr1 = input.charCodeAt(i++);
+        chr2 = input.charCodeAt(i++);
+        chr3 = input.charCodeAt(i++);
+        enc1 = chr1 >> 2;
+        enc2 = (chr1 & 3) << 4 | chr2 >> 4;
+        enc3 = (chr2 & 15) << 2 | chr3 >> 6;
+        enc4 = chr3 & 63;
+        if (isNaN(chr2)) {
+            enc3 = enc4 = 64;
+        } else if (isNaN(chr3)) {
+            enc4 = 64;
+        }
+        output = output + keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) + keyStr.charAt(enc4);
+    }
+    return output;
+}
+
+
+$('.wrap').on('tap','.js-play-mv',function () {
+    var vid=this.getAttribute ('data-vid');
+    if (!vid) {
+        return ;
+    }
+    if ($.browser.music) {
+        M.bridgeCall('19',{
+            k2:vid,
+            k3:base64Encode(this.getAttribute ('data-mvname')),
+            k7:base64Encode(this.getAttribute ('data-mvsinger'))
+        },function () {
+        })
+    }else {
+        location.href='http://y.qq.com/w/mv.html?vid=' + vid;
+    }
+}).on('tap','.js-open-music',function () {
+    if ($.browser.music) {
+        M.bridgeCall('16',{
+            k1:1,
+            k3:base64Encode('MV精选'),
+            k4:2009
+        },function () {
+        })
+    }else {
+        M.openMusic();
+    }
+}).on('tap','.btn_share',function () {
+    M.share.call();
+})
+
+
+M.share.init({
+    title:'【QQ音乐双语MV】',
+    desc:'“译”动你我，极致体验',
+    link:M.delParam('mmkey',M.delParam('sid',location.href)),
+    img:'http://i.gtimg.cn/music/common/upload/msa/201523/28d24ec09ebb9d93cf331d8eaec217be.jpg'
+})
+
+
+
+</script>
+</body>
+</html>
