@@ -134,13 +134,13 @@ iSlider.prototype={
         this.deltaX1 = 0;//每次移动的正负
         this.deltaX2 = 0;//每次移动的正负
 
+        this.wrap.style.cssText+="display:block;position:relative;width:100%;height:100%";
         this.displayWidth = this.wrap.clientWidth; //滑动区域最大宽度
         this.displayHeight = this.wrap.clientHeight; //滑动区域最大高度
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
 
         this._setHTML();
-        this.wrap.style.cssText+="display:block;position:relative;width:100%;height:100%";
 
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
             this._loading();
