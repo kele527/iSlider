@@ -152,15 +152,24 @@ iSlider.prototype={
         this.totalDist = 0,//移动的总距离
         this.deltaX1 = 0;//每次移动的正负
         this.deltaX2 = 0;//每次移动的正负
+        
+        //全屏滑动 设置样式
+        if (this.opts.fullScr) {
+            var s = document.createElement('style');
+            s.innerHTML = 'html,body{width:100%;height:100%;overflow:hidden}';
+            document.head.appendChild(s);
+            s = null;
+        }
 
         this.wrap.style.cssText+="display:block;position:relative;"+(this.opts.fullScr ? 'width:100%;height:100%':'');
-
+        
+        //必须要在前面的布局都设置好后 再来获取尺寸
         this.displayWidth = this.wrap.clientWidth; //滑动区域最大宽度
         this.displayHeight = this.wrap.clientHeight; //滑动区域最大高度
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
 
-        this._setHTML();
+        this._setHTML();// 填充初始DOM
 
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
             this._loading();
@@ -172,12 +181,6 @@ iSlider.prototype={
             this._delayTime=50;
         }
 
-        if (this.opts.fullScr) {
-            var s = document.createElement('style');
-            s.innerHTML = 'html,body{width:100%;height:100%}';
-            document.head.appendChild(s);
-            s = null;
-        }
 
         this._bindEvt();
 	},
@@ -293,13 +296,13 @@ iSlider.prototype={
 		
 		//处理上一张和下一张
 		if (this.totalDist<0) {//露出下一张
-			if (this.hasNext) {
+			if (this._next) {
 				this.totalDist2 = this.startPosNext + currentX - this.touchInitPos;
 				self._next.style.cssText += this._getTransform(this.totalDist2+'px');
 				this.startPosNext = this.totalDist2;
 			}
 		}else {//露出上一张
-			if (this.hasPrev) {
+			if (this._prev) {
 				this.totalDist2 = this.startPosPrev + currentX - this.touchInitPos;
 				self._prev.style.cssText += this._getTransform(this.totalDist2+'px');
 				this.startPosPrev = this.totalDist2;
