@@ -130,7 +130,7 @@ iSlider.prototype={
         var self = this;
         this.wrap = typeof this.opts.wrap=='string' ? this.$(this.opts.wrap) : this.opts.wrap ;
         //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
-        this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.className));
+        this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.id+this.wrap.className));
 
         var lastLocateIndex=parseInt(sessionStorage[this._sessionKey]);
         this.index = ((this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0) || this.opts.index || 0;
@@ -144,7 +144,7 @@ iSlider.prototype={
         this._tpl = this.opts.item ? this._tpl.querySelectorAll(this.opts.item) : this._tpl.children;
 
         for (var i=0; i<this._tpl.length; i++) {
-            this._tpl[i].style.cssText+='position:absolute;left:0;top:0;width:100%;height:100%'
+            this._tpl[i].style.cssText+='display:block;position:absolute;left:0;top:0;width:100%;height:100%'
         };
 
         this.length=this._tpl.length; //总页数数据
@@ -440,7 +440,7 @@ iSlider.prototype={
 
             self._prev = self._tpl[prevIndex].cloneNode(true);
             self._prev.style.cssText+='-webkit-transition-duration:0ms;'+self._getTransform('-'+self.scrollDist+'px');
-            self.wrap.insertBefore(self._prev,self.$('.js-i-current',self.wrap));
+            self.wrap.insertBefore(self._prev,self._current);
 
         },this._delayTime)
 
