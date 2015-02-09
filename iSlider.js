@@ -7,15 +7,15 @@
  * @param {string} opts.item='.item'  滚动单元的元素
  * @param {string} opts.playClass='play'  触发播放动画的class
  * @param {number} [opts.index=0]  设置初始显示的页码
- * @param {number} [opts.noslide=[0,3,4]]  设置禁止滑动的页码, 禁止后 需要开发者手动绑定页面中的某个按钮事件进行滑动 
+ * @param {array} [opts.noslide=[]]  设置禁止滑动的页面序号(0开始), 禁止后 需要开发者手动绑定页面中的某个按钮事件进行滑动 
  * @param {number} [opts.speed=400] 动画速度 单位:ms
  * @param {number} [opts.triggerDist=30] 触发滑动的手指移动最小位移 单位:像素
- * @param {boolean} [opts.isVertical=true] 滑动方向 是否是垂直方向 默认是.
+ * @param {boolean} [opts.isVertical=true] 是否是垂直滑动 默认是.  设成false为水平滑动.
  * @param {boolean} [opts.useACC=true] 是否启用硬件加速 默认启用
  * @param {boolean} [opts.fullScr=true] 是否是全屏的 默认是. 如果是局部滑动,请设为false
  * @param {boolean} [opts.preventMove=false] 是否阻止系统默认的touchmove移动事件,  默认不阻止, 该参数仅在局部滚动时有效,   如果是局部滚动 如果为true 那么在这个区域滑动的时候 将不会滚动页面.  如果是全屏情况 则会阻止
  * @param {boolean} [opts.lastLocate=true] 后退后定位到上次浏览的位置 默认true
- * @param {function} [opts.onslide]  滑动后回调函数
+ * @param {function} [opts.onslide]  滑动后回调函数  会回传index参数
  * @param {array} [opts.loadingImgs]  loading需要加载的图片地址列表
  * @param {function} [opts.onloading]  loading时每加载完成一个图片都会触发这个回调  回调时参数值为 (已加载个数,总数)
  * @param {number} [opts.loadingOverTime=15]  预加载超时时间 单位:秒
