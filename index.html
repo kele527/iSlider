@@ -31,13 +31,675 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h1>
-<a id="islider" class="anchor" href="#islider" aria-hidden="true"><span class="octicon octicon-link"></span></a>iSlider</h1>
+        <h1><a id="islider" class="anchor" href="#islider" aria-hidden="true"><span class="octicon octicon-link"></span></a>iSlider</h1>
 
-<p>如丝般高性能H5全屏滑动组件</p>
+        <p>如丝般高性能H5全屏滑动组件</p>
+        <ul>
+            <li>简洁, 易用, 半行代码搞定. </li>
+            <li>性能卓越, 如丝般高性能全屏动画滑屏组件. </li>
+            <li>耦合完全分离, 更轻量, 无CSS依赖,无任何js库依赖.</li>
+            <li>一个组件只做一个事情, 专注于页面滑动, 避免冗余 , 保证性能.</li>
+        </ul>
 
-<a href="demo1.html" title="">DEMO1: 垂直滑动</a>
-<a href="demo2.html" title="">DEMO2: 水平滑动</a>
+        <div class="">
+            <h3>DMEO</h3>
+            <a href="demo1.html" title="">DEMO1: 垂直滑动</a>
+            <br />
+            <a href="demo2.html" title="">DEMO2: 水平滑动</a>
+            <br />
+            <a href="demo3.html" title="">DEMO3: </a>
+        </div>
+        <div class="">
+            <h3>参数:</h3>
+            <table class="params">
+                <thead>
+                <tr>
+                    
+                    <th>Name</th>
+                    
+
+                    <th>Type</th>
+
+                    
+                    <th>Attributes</th>
+                    
+
+                    
+                    <th>Default</th>
+                    
+
+                    <th class="last">Description</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>wrap</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">string</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                '.wrap'
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>容器</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>item</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">string</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                '.item'
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>滚动单元的元素</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>playClass</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">string</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                'play'
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>触发播放动画的class</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>index</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">number</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                0
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>设置初始显示的页码</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>noslide</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">array</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                []
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>设置禁止滑动的页面序号(0开始), 禁止后 需要开发者手动绑定页面中的某个按钮事件进行滑动</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>speed</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">number</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                400
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>动画速度 单位:ms</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>triggerDist</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">number</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                30
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>触发滑动的手指移动最小位移 单位:像素</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>isVertical</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">boolean</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                true
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>是否是垂直滑动 默认是.  设成false为水平滑动.</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>useACC</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">boolean</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                true
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>是否启用硬件加速 默认启用</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>fullScr</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">boolean</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                true
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>是否是全屏的 默认是. 如果是局部滑动,请设为false</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>preventMove</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">boolean</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                false
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>是否阻止系统默认的touchmove移动事件,  默认不阻止, 该参数仅在局部滚动时有效,   如果是局部滚动 如果为true 那么在这个区域滑动的时候 将不会滚动页面.  如果是全屏情况 则会阻止</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>lastLocate</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">boolean</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                true
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>后退后定位到上次浏览的位置 默认true</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>onslide</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">function</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>滑动后回调函数  会回传index参数</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>loadingImgs</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">array</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>loading需要加载的图片地址列表</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>onloading</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">function</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>loading时每加载完成一个图片都会触发这个回调  回调时参数值为 (已加载个数,总数)</p></td>
+                    </tr>
+
+                
+
+                    <tr>
+                        
+                            <td class="name"><code>loadingOverTime</code></td>
+                        
+
+                        <td class="type">
+                        
+                            
+            <span class="param-type">number</span>
+
+
+                        
+                        </td>
+
+                        
+                            <td class="attributes">
+                            
+                                &lt;optional&gt;<br>
+                            
+
+                            
+
+                            
+                            </td>
+                        
+
+                        
+                            <td class="default">
+                            
+                                15
+                            
+                            </td>
+                        
+
+                        <td class="description last"><p>预加载超时时间 单位:秒</p></td>
+                    </tr>
+
+                
+                </tbody>
+            </table>
+        </div>
+
+        <div class="">
+            <h3>方法</h3>
+            <ul>
+                <li>prev()</li>
+                <li>next()</li>
+                <li>slideTo()</li>
+            </ul>
+        </div>
+
+
       </section>
     </div>
 
