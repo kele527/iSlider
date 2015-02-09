@@ -106,7 +106,6 @@ iSlider.prototype={
     _tpl:[],
     _delayTime:150,
     _sessionKey : location.host+location.pathname,
-    _id:parseInt(Math.random()*1000),
     _prev:null,
     _current:null,
     _next:null,
@@ -129,10 +128,12 @@ iSlider.prototype={
     },
 	init:function () {
         var self = this;
+        this.wrap = typeof this.opts.wrap=='string' ? this.$(this.opts.wrap) : this.opts.wrap ;
         //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
+        this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.className));
+
         var lastLocateIndex=parseInt(sessionStorage[this._sessionKey]);
         this.index = ((this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0) || this.opts.index || 0;
-        this.wrap = typeof this.opts.wrap=='string' ? this.$(this.opts.wrap) : this.opts.wrap ;
 
         if (!this.wrap) {
             throw Error('"wrap" param can not be empty!');
