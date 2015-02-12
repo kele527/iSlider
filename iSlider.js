@@ -236,12 +236,13 @@ iSlider.prototype={
         var self = this;
         setTimeout(function () {
             self.addClass(self._current,self.opts.playClass);
+
+            try {
+                self.opts.onslide.call(self,self.index);
+            } catch (e) {
+                console.info(e)
+            }
         },this._delayTime);
-        try {
-            self.opts.onslide.call(self,self.index);
-        } catch (e) {
-            console.info(e)
-        }
     },
 	_touchstart : function (e) {
         var self=this;
