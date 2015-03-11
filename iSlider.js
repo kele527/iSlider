@@ -106,7 +106,6 @@ iSlider.prototype={
     _tpl:[],
     _delayTime:150,
     _sessionKey : location.host+location.pathname,
-    _id:parseInt(Math.random()*1000),
     _prev:null,
     _current:null,
     _next:null,
@@ -129,10 +128,12 @@ iSlider.prototype={
     },
 	init:function () {
         var self = this;
+        this.wrap = typeof this.opts.wrap=='string' ? this.$(this.opts.wrap) : this.opts.wrap ;
         //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
+        this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.id+this.wrap.className));
+
         var lastLocateIndex=parseInt(sessionStorage[this._sessionKey]);
         this.index = ((this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0) || this.opts.index || 0;
-        this.wrap = typeof this.opts.wrap=='string' ? this.$(this.opts.wrap) : this.opts.wrap ;
 
         if (!this.wrap) {
             throw Error('"wrap" param can not be empty!');
@@ -143,7 +144,7 @@ iSlider.prototype={
         this._tpl = this.opts.item ? this._tpl.querySelectorAll(this.opts.item) : this._tpl.children;
 
         for (var i=0; i<this._tpl.length; i++) {
-            this._tpl[i].style.cssText+='position:absolute;left:0;top:0;width:100%;height:100%'
+            this._tpl[i].style.cssText+='display:block;position:absolute;left:0;top:0;width:100%;height:100%'
         };
 
         this.length=this._tpl.length; //总页数数据
@@ -152,15 +153,24 @@ iSlider.prototype={
         this.totalDist = 0,//移动的总距离
         this.deltaX1 = 0;//每次移动的正负
         this.deltaX2 = 0;//每次移动的正负
+        
+        //全屏滑动 设置样式
+        if (this.opts.fullScr) {
+            var s = document.createElement('style');
+            s.innerHTML = 'html,body{width:100%;height:100%;overflow:hidden}';
+            document.head.appendChild(s);
+            s = null;
+        }
 
         this.wrap.style.cssText+="display:block;position:relative;"+(this.opts.fullScr ? 'width:100%;height:100%':'');
-
+        
+        //必须要在前面的布局都设置好后 再来获取尺寸
         this.displayWidth = this.wrap.clientWidth; //滑动区域最大宽度
         this.displayHeight = this.wrap.clientHeight; //滑动区域最大高度
 
         this.scrollDist=this.opts.isVertical ? this.displayHeight : this.displayWidth;//滚动的区域尺寸 
 
-        this._setHTML();
+        this._setHTML();// 填充初始DOM
 
         if (this.opts.loadingImgs && this.opts.loadingImgs.length) {
             this._loading();
@@ -172,12 +182,6 @@ iSlider.prototype={
             this._delayTime=50;
         }
 
-        if (this.opts.fullScr) {
-            var s = document.createElement('style');
-            s.innerHTML = 'html,body{width:100%;height:100%}';
-            document.head.appendChild(s);
-            s = null;
-        }
 
         this._bindEvt();
 	},
@@ -232,12 +236,13 @@ iSlider.prototype={
         var self = this;
         setTimeout(function () {
             self.addClass(self._current,self.opts.playClass);
+
+            try {
+                self.opts.onslide.call(self,self.index);
+            } catch (e) {
+                console.info(e)
+            }
         },this._delayTime);
-        try {
-            self.opts.onslide.call(self,self.index);
-        } catch (e) {
-            console.info(e)
-        }
     },
 	_touchstart : function (e) {
         var self=this;
@@ -293,13 +298,13 @@ iSlider.prototype={
 		
 		//处理上一张和下一张
 		if (this.totalDist<0) {//露出下一张
-			if (this.hasNext) {
+			if (this._next) {
 				this.totalDist2 = this.startPosNext + currentX - this.touchInitPos;
 				self._next.style.cssText += this._getTransform(this.totalDist2+'px');
 				this.startPosNext = this.totalDist2;
 			}
 		}else {//露出上一张
-			if (this.hasPrev) {
+			if (this._prev) {
 				this.totalDist2 = this.startPosPrev + currentX - this.touchInitPos;
 				self._prev.style.cssText += this._getTransform(this.totalDist2+'px');
 				this.startPosPrev = this.totalDist2;
@@ -436,7 +441,7 @@ iSlider.prototype={
 
             self._prev = self._tpl[prevIndex].cloneNode(true);
             self._prev.style.cssText+='-webkit-transition-duration:0ms;'+self._getTransform('-'+self.scrollDist+'px');
-            self.wrap.insertBefore(self._prev,self.$('.js-i-current',self.wrap));
+            self.wrap.insertBefore(self._prev,self._current);
 
         },this._delayTime)
 
