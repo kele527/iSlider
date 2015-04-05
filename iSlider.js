@@ -207,7 +207,7 @@ iSlider.prototype={
     },
     _setHTML:function (index) {
         if (index>=0) {
-            this.index=index;
+            this.index=parseInt(index);
         }
         this.wrap.innerHTML='';
 
