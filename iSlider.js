@@ -217,6 +217,8 @@ iSlider.prototype={
             this._prev=this._tpl[this.index-1].cloneNode(true);
             this._prev.style.cssText+=this._getTransform('-'+this.scrollDist+'px');
             initDom.appendChild(this._prev)
+        }else {
+            this._prev=null;
         }
         this._current =this._tpl[this.index].cloneNode(true);
 
@@ -227,6 +229,8 @@ iSlider.prototype={
             this._next=this._tpl[this.index+1].cloneNode(true);
             this._next.style.cssText+=this._getTransform(this.scrollDist+'px');
             initDom.appendChild(this._next)
+        }else {
+            this._next=null;
         }
 
         this.wrap.appendChild(initDom);
@@ -269,6 +273,15 @@ iSlider.prototype={
 		}
 	},
 	_touchmove : function (e) {
+        var parent=e.target;
+        do {
+            parent=parent.parentNode;
+        } while (parent!=this.wrap);
+ 
+        if (!parent && e.target!=this.wrap ) {
+            return ;
+        }
+
         var self = this;
 		if(e.touches.length !== 1 || this.lockSlide){return;}
 
@@ -405,7 +418,7 @@ iSlider.prototype={
             return false;
         }
 
-        var nextIndex = this.index+1 > this.length-1 ? 0 : this.index+1;
+//        var nextIndex = this.index+1 > this.length-1 ? 0 : this.index+1;
 
         if (this._next) {
             this.wrap.removeChild(this._next);
@@ -467,9 +480,9 @@ iSlider.prototype={
             return false;
         }
         
-        var prevIndex = this.index===0 ? this.length-1 : this.index-1;
-        if (this._prev) {
+//        var prevIndex = this.index===0 ? this.length-1 : this.index-1;
 
+        if (this._prev) {
             this.wrap.removeChild(this._prev);
         }
 
