@@ -79,6 +79,7 @@ function iSlider(opts) {
         playClass:'play',
         index:0,
         noslide:[],
+        noslideBack:false, //当noslide生效的时候 是否允许往回滑动  默认不允许, 如果有需要可以开启
         speed:400, //滑屏速度 单位:ms
         triggerDist:30,//触发滑动的手指移动最小位移 单位:像素
         isVertical:true,//垂直滑还是水平滑动
@@ -182,7 +183,6 @@ iSlider.prototype={
             this._delayTime=50;
         }
 
-
         this._bindEvt();
 	},
     _bindEvt:function () {
@@ -193,6 +193,10 @@ iSlider.prototype={
         },false);
         handlrElm.addEventListener('touchmove',function (e) {
             self._touchmove(e);
+            if (!self.opts.fullScr) { //修复手Q中局部使用时的一个bug
+                e.stopPropagation();
+                e.preventDefault();
+            }
         },false);
         handlrElm.addEventListener('touchend',function (e) {
             self._touchend(e);
@@ -207,7 +211,7 @@ iSlider.prototype={
     },
     _setHTML:function (index) {
         if (index>=0) {
-            this.index=index;
+            this.index=parseInt(index);
         }
         this.wrap.innerHTML='';
 
@@ -217,6 +221,8 @@ iSlider.prototype={
             this._prev=this._tpl[this.index-1].cloneNode(true);
             this._prev.style.cssText+=this._getTransform('-'+this.scrollDist+'px');
             initDom.appendChild(this._prev)
+        }else {
+            this._prev=null;
         }
         this._current =this._tpl[this.index].cloneNode(true);
 
@@ -227,6 +233,8 @@ iSlider.prototype={
             this._next=this._tpl[this.index+1].cloneNode(true);
             this._next.style.cssText+=this._getTransform(this.scrollDist+'px');
             initDom.appendChild(this._next)
+        }else {
+            this._next=null;
         }
 
         this.wrap.appendChild(initDom);
@@ -240,7 +248,7 @@ iSlider.prototype={
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
-                console.info(e)
+//                console.info(e)
             }
         },this._delayTime);
     },
@@ -269,6 +277,15 @@ iSlider.prototype={
 		}
 	},
 	_touchmove : function (e) {
+        var parent=e.target;
+        do {
+            parent=parent.parentNode;
+        } while (parent!=this.wrap);
+ 
+        if (!parent && e.target!=this.wrap ) {
+            return ;
+        }
+
         var self = this;
 		if(e.touches.length !== 1 || this.lockSlide){return;}
 
@@ -283,11 +300,15 @@ iSlider.prototype={
             this.lockSlide=true;
             return ;
         }
-        
-        //如果是禁用了这一页的滑动, 那么往下是划不动了  但是可以往上滑
-        if (this.opts.noslide && this.opts.noslide.indexOf(this.index)>=0 && e.touches[0].pageY - this._touchstartY<0) {
-            return ;
+
+        if (this.opts.noslide && this.opts.noslide.indexOf(this.index)>=0) {
+            //noslideBack 默认值是false   默认是禁用滑动后 前后都不能再滑动,
+            //但是当noslideBack为true时, 禁用了这一页的滑动, 那么往下是划不动了  但是可以往上滑
+            if (!this.opts.noslideBack || (e.touches[0].pageY - this._touchstartY < 0 || e.touches[0].pageX - this._touchstartX < 0)) {
+                return ;
+            }
         }
+
 
 		var currentX = this.opts.isVertical ? e.touches[0].pageY:e.touches[0].pageX;
 		this.deltaX2 = currentX - this.deltaX1;//记录当次移动的偏移量
@@ -405,7 +426,7 @@ iSlider.prototype={
             return false;
         }
 
-        var nextIndex = this.index+1 > this.length-1 ? 0 : this.index+1;
+//        var nextIndex = this.index+1 > this.length-1 ? 0 : this.index+1;
 
         if (this._next) {
             this.wrap.removeChild(this._next);
@@ -430,7 +451,7 @@ iSlider.prototype={
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
-                console.info(e)
+//                console.info(e)
             }
 
             var prevIndex = self.index-1;
@@ -467,9 +488,9 @@ iSlider.prototype={
             return false;
         }
         
-        var prevIndex = this.index===0 ? this.length-1 : this.index-1;
-        if (this._prev) {
+//        var prevIndex = this.index===0 ? this.length-1 : this.index-1;
 
+        if (this._prev) {
             this.wrap.removeChild(this._prev);
         }
 
@@ -490,7 +511,7 @@ iSlider.prototype={
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
-                console.info(e)
+//                console.info(e)
             }
 
             var nextIndex = self.index+1;
