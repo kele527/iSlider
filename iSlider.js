@@ -294,7 +294,7 @@ iSlider.prototype={
         var parent=e.target;
         do {
             parent=parent.parentNode;
-        } while (parent!=this.wrap);
+        } while (parent && parent!=this.wrap);
  
         if (!parent && e.target!=this.wrap ) {
             return ;
