@@ -97,6 +97,14 @@ function iSlider(opts) {
         this.opts[i]=opts[i];
     }
 
+    this.SS=false;
+    try {
+        this.SS=sessionStorage;
+        this.SS['spt']=1;//检测是否是ios私密浏览模式 如果是私密模式 这一行会报错 进入到catch
+    }catch (e) {
+        this.SS=0;
+    }
+
     this.init();
 }
 /**  @lends iSlider */
@@ -130,11 +138,17 @@ iSlider.prototype={
 	init:function () {
         var self = this;
         this.wrap = typeof this.opts.wrap=='string' ? this.$(this.opts.wrap) : this.opts.wrap ;
-        //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
-        this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.id+this.wrap.className));
 
-        var lastLocateIndex=parseInt(sessionStorage[this._sessionKey]);
-        this.index = ((this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0) || this.opts.index || 0;
+        if (this.SS) {
+            //使用sessionStorage来保存当前浏览到第几页了   后退回来的时候 定位到这一页
+            this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.id+this.wrap.className));
+
+            var lastLocateIndex=parseInt(this.SS[this._sessionKey]);
+            this.index = (this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0;
+        }else {
+            this.index = this.opts.index || 0;
+        }
+        
 
         if (!this.wrap) {
             throw Error('"wrap" param can not be empty!');
@@ -248,7 +262,7 @@ iSlider.prototype={
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
-                console.info(e)
+//                console.info(e)
             }
         },this._delayTime);
     },
@@ -438,8 +452,9 @@ iSlider.prototype={
 
         this._next.style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(this.scrollDist+'px');
         this._current.style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(0);
-
-        sessionStorage[this._sessionKey]=this.index;
+        if (this.SS) {
+            this.SS[this._sessionKey]=this.index;
+        }
 
         setTimeout(function () {
 
@@ -451,7 +466,7 @@ iSlider.prototype={
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
-                console.info(e)
+//                console.info(e)
             }
 
             var prevIndex = self.index-1;
@@ -500,7 +515,9 @@ iSlider.prototype={
 
         this._prev.style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform('-'+this.scrollDist+'px');
         this._current.style.cssText+='-webkit-transition-duration:'+this.opts.speed+'ms;'+this._getTransform(0);
-        sessionStorage[this._sessionKey]=this.index;
+        if (this.SS) {
+            this.SS[this._sessionKey]=this.index;
+        }
 
         setTimeout(function () {
             if (self.$('.'+self.opts.playClass,self.wrap)) {
@@ -511,7 +528,7 @@ iSlider.prototype={
             try {
                 self.opts.onslide.call(self,self.index);
             } catch (e) {
-                console.info(e)
+//                console.info(e)
             }
 
             var nextIndex = self.index+1;
