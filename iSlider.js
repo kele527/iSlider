@@ -318,7 +318,7 @@ iSlider.prototype={
         if (this.opts.noslide && this.opts.noslide.indexOf(this.index)>=0) {
             //noslideBack 默认值是false   默认是禁用滑动后 前后都不能再滑动,
             //但是当noslideBack为true时, 禁用了这一页的滑动, 那么往下是划不动了  但是可以往上滑
-            if (!this.opts.noslideBack || (e.touches[0].pageY - this._touchstartY < 0 || e.touches[0].pageX - this._touchstartX < 0)) {
+            if ( !this.opts.noslideBack || (this.opts.isVertical ? (e.touches[0].pageY - this._touchstartY < 0) : (e.touches[0].pageX - this._touchstartX < 0)) ) {
                 return ;
             }
         }
