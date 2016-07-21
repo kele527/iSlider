@@ -97,7 +97,7 @@ function iSlider(opts) {
         this.opts[i]=opts[i];
     }
 
-    this.SS=false;
+    this.SS=false; //是否支持sessionStorage
     try {
         this.SS=sessionStorage;
         this.SS['spt']=1;//检测是否是ios私密浏览模式 如果是私密模式 这一行会报错 进入到catch
@@ -144,7 +144,7 @@ iSlider.prototype={
             this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.id+this.wrap.className));
 
             var lastLocateIndex=parseInt(this.SS[this._sessionKey]);
-            this.index = (this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0;
+            this.index = (this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : (this.opts.index || 0); //如果设置了初始化时的index页数,  那么可能需要设置 lastLocate 为false才能保证每次刷新页面 都定位在index位置
         }else {
             this.index = this.opts.index || 0;
         }
