@@ -97,7 +97,7 @@ function iSlider(opts) {
         this.opts[i]=opts[i];
     }
 
-    this.SS=false; //是否支持sessionStorage
+    this.SS=false;
     try {
         this.SS=sessionStorage;
         this.SS['spt']=1;//检测是否是ios私密浏览模式 如果是私密模式 这一行会报错 进入到catch
@@ -144,7 +144,7 @@ iSlider.prototype={
             this._sessionKey=btoa(encodeURIComponent(this._sessionKey+this.wrap.id+this.wrap.className));
 
             var lastLocateIndex=parseInt(this.SS[this._sessionKey]);
-            this.index = (this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : (this.opts.index || 0); //如果设置了初始化时的index页数,  那么可能需要设置 lastLocate 为false才能保证每次刷新页面 都定位在index位置
+            this.index = (this.opts.lastLocate && lastLocateIndex>=0) ? lastLocateIndex : 0;
         }else {
             this.index = this.opts.index || 0;
         }
@@ -220,7 +220,7 @@ iSlider.prototype={
         },false);
 
         if (this.opts.fullScr || this.opts.preventMove) {
-            handlrElm.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+            handlrElm.addEventListener('touchmove', function (e) {e.target.getAttribute('data-stop') !== "true" && e.preventDefault(); }, false);
         }
     },
     _setHTML:function (index) {
@@ -268,6 +268,7 @@ iSlider.prototype={
     },
 	_touchstart : function (e) {
         var self=this;
+        if(e.target.getAttribute("data-stop") === "true")return;
 		if(e.touches.length !== 1){return;}//如果大于1个手指，则不处理
         
         this.lockSlide=false;
@@ -292,6 +293,8 @@ iSlider.prototype={
 	},
 	_touchmove : function (e) {
         var parent=e.target;
+        if(parent.getAttribute("stop") === "true")return;
+
         do {
             parent=parent.parentNode;
         } while (parent && parent!=this.wrap);
@@ -349,6 +352,7 @@ iSlider.prototype={
 		this.touchInitPos = currentX;
 	},
 	_touchend : function (e) {
+        if(e.target.getAttribute("stop") === "true")return;
 		if(this.deltaX2 < -this.opts.triggerDist){
 			this.next();
 		}else if(this.deltaX2 > this.opts.triggerDist){
